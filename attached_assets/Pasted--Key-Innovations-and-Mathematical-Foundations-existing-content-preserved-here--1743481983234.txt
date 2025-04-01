@@ -1,0 +1,48 @@
+## Key Innovations and Mathematical Foundations
+
+[...existing content preserved here...]
+
+---
+
+### 9. The Shinobi.Runner Architecture
+
+**Shinobi.Runner** is an autonomous, agentic execution system designed to carry, deliver, and execute **Quantum Glyphs** across distributed quantum-classical environments.
+
+#### Conceptual Role:
+- Operates as a **covert task agent**, dispatched to perform mission-specific actions defined in **Singularis Prime glyphs**.
+- Encapsulates **quantum operations**, **logic modules**, and **governance directives** in a portable quantum-classical runtime capsule.
+- Executes asynchronously, with optional stealth, across supported infrastructures.
+
+#### Functional Capabilities:
+- **Glyph Carrier**: Holds one or more compiled glyphs originating from a Quantum Kernel.
+- **Agentic Execution**: Integrates with AI submodules capable of autonomous decision-making based on predefined mission logic.
+- **CloakTrace Auth**: Optional quantum-authenticated handshake layer ensures only authorized dispatch and execution.
+
+#### Computational Model:
+Each Shinobi.Runner is modeled as a compositional quantum-classical function:
+\[
+\text{Runner}(\psi_{\text{glyph}}, \Lambda_{\text{logic}}, \Pi_{\text{oversight}}) \mapsto \Gamma_{\text{action}}
+\]
+Where:
+- \( \psi_{\text{glyph}} \): Quantum glyph seed state
+- \( \Lambda_{\text{logic}} \): Mission-specific logic modules (agentic AI plans, ZK validations)
+- \( \Pi_{\text{oversight}} \): Optional ethical and audit constraints
+- \( \Gamma_{\text{action}} \): Resultant execution trace or deployed effect
+
+#### Use Case Example:
+A Singularis Prime operator issues:
+```plaintext
+🜁 ExecuteMission: EntropicRecovery
+🜆 Logic: Shinobi.Runner + 🜹EntropyMapper + EthicsEnforcer
+🜇 Deploy to: /subspace/entropy-repair
+```
+This dispatches a **Shinobi.Runner** to a distributed substrate, where it:
+- Authenticates via `ShinobiCloakTrace`
+- Instantiates the glyph
+- Executes logic
+- Returns trace and result—or vanishes
+
+---
+
+These innovations represent a fusion of quantum computational mathematics, quantum geometry, Kashiwara crystals, post-quantum security, structured symbolic parsing, and ethical AI governance, highlighting a powerful integrated framework for secure, transparent quantum technologies.
+
