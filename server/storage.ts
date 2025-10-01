@@ -5,7 +5,8 @@ import {
   quantumServices, type QuantumService, type InsertQuantumService,
   missions, type Mission, type InsertMission,
   missionLogics, type MissionLogic, type InsertMissionLogic,
-  authTokens, type AuthToken, type InsertAuthToken
+  authTokens, type AuthToken, type InsertAuthToken,
+  quantumMessages, type QuantumMessage, type InsertQuantumMessage
 } from "@shared/schema";
 import { nanoid } from "nanoid";
 
@@ -52,6 +53,14 @@ export interface IStorage {
   createAuthToken(authToken: InsertAuthToken): Promise<AuthToken>;
   getAuthToken(token: string): Promise<AuthToken | undefined>;
   invalidateAuthToken(token: string): Promise<void>;
+
+  // Quantum Message operations
+  getQuantumMessage(id: number): Promise<QuantumMessage | undefined>;
+  getQuantumMessageByMessageId(messageId: string): Promise<QuantumMessage | undefined>;
+  createQuantumMessage(message: InsertQuantumMessage): Promise<QuantumMessage>;
+  updateQuantumMessageStatus(id: number, status: string): Promise<QuantumMessage | undefined>;
+  listQuantumMessages(): Promise<QuantumMessage[]>;
+  listQuantumMessagesByUser(userId: number): Promise<QuantumMessage[]>;
 }
 
 // In-memory storage implementation
@@ -63,6 +72,7 @@ export class MemStorage implements IStorage {
   private missions: Map<number, Mission>;
   private missionLogics: Map<number, MissionLogic>;
   private authTokens: Map<number, AuthToken>;
+  private quantumMessages: Map<number, QuantumMessage>;
   
   // Counters for auto-incrementing IDs
   private userIdCounter: number;
@@ -72,6 +82,7 @@ export class MemStorage implements IStorage {
   private missionIdCounter: number;
   private missionLogicIdCounter: number;
   private authTokenIdCounter: number;
+  private quantumMessageIdCounter: number;
 
   constructor() {
     this.users = new Map();
@@ -81,6 +92,7 @@ export class MemStorage implements IStorage {
     this.missions = new Map();
     this.missionLogics = new Map();
     this.authTokens = new Map();
+    this.quantumMessages = new Map();
     
     this.userIdCounter = 1;
     this.glyphIdCounter = 1;
@@ -89,6 +101,7 @@ export class MemStorage implements IStorage {
     this.missionIdCounter = 1;
     this.missionLogicIdCounter = 1;
     this.authTokenIdCounter = 1;
+    this.quantumMessageIdCounter = 1;
     
     // Initialize with default data
     this.seedDefaultData();
@@ -298,6 +311,57 @@ export class MemStorage implements IStorage {
     if (authToken) {
       this.authTokens.delete(authToken.id);
     }
+  }
+
+  // Quantum Message methods
+  async getQuantumMessage(id: number): Promise<QuantumMessage | undefined> {
+    return this.quantumMessages.get(id);
+  }
+
+  async getQuantumMessageByMessageId(messageId: string): Promise<QuantumMessage | undefined> {
+    return Array.from(this.quantumMessages.values()).find(
+      (message) => message.messageId === messageId,
+    );
+  }
+
+  async createQuantumMessage(insertMessage: InsertQuantumMessage): Promise<QuantumMessage> {
+    const id = this.quantumMessageIdCounter++;
+    const now = new Date();
+    const quantumMessage: QuantumMessage = { 
+      ...insertMessage, 
+      id, 
+      transmissionStatus: insertMessage.transmissionStatus || "pending",
+      missionId: insertMessage.missionId || null,
+      metadata: insertMessage.metadata || null,
+      createdAt: now,
+      transmittedAt: null
+    };
+    this.quantumMessages.set(id, quantumMessage);
+    return quantumMessage;
+  }
+
+  async updateQuantumMessageStatus(id: number, status: string): Promise<QuantumMessage | undefined> {
+    const message = this.quantumMessages.get(id);
+    if (!message) return undefined;
+    
+    const updatedMessage: QuantumMessage = {
+      ...message,
+      transmissionStatus: status,
+      transmittedAt: status === 'transmitted' ? new Date() : message.transmittedAt
+    };
+    
+    this.quantumMessages.set(id, updatedMessage);
+    return updatedMessage;
+  }
+
+  async listQuantumMessages(): Promise<QuantumMessage[]> {
+    return Array.from(this.quantumMessages.values());
+  }
+
+  async listQuantumMessagesByUser(userId: number): Promise<QuantumMessage[]> {
+    return Array.from(this.quantumMessages.values()).filter(
+      (message) => message.userId === userId
+    );
   }
 
   // Seed with initial data

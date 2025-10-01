@@ -8,7 +8,8 @@ import {
   insertLogicModuleSchema,
   insertQuantumServiceSchema,
   insertMissionSchema,
-  insertMissionLogicSchema
+  insertMissionLogicSchema,
+  insertQuantumMessageSchema
 } from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
@@ -347,6 +348,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } else {
       res.status(500).json({ error: 'Failed to authorize mission' });
     }
+  });
+
+  // Quantum Message routes
+  app.post('/api/quantum-messages', async (req: Request, res: Response) => {
+    try {
+      const messageData = insertQuantumMessageSchema.parse(req.body);
+      const newMessage = await storage.createQuantumMessage(messageData);
+      res.status(201).json(newMessage);
+      
+      // Broadcast new quantum message to clients
+      broadcastMessage('quantumMessageCreated', newMessage);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ error: fromZodError(error).message });
+      } else {
+        res.status(500).json({ error: 'Failed to create quantum message' });
+      }
+    }
+  });
+
+  app.get('/api/quantum-messages', async (_req: Request, res: Response) => {
+    const messages = await storage.listQuantumMessages();
+    res.json(messages);
+  });
+
+  app.get('/api/quantum-messages/:messageId/status', async (req: Request, res: Response) => {
+    const messageId = req.params.messageId;
+    
+    const message = await storage.getQuantumMessageByMessageId(messageId);
+    if (!message) {
+      return res.status(404).json({ error: 'Quantum message not found' });
+    }
+    
+    res.json({
+      transmissionStatus: message.transmissionStatus,
+      transmittedAt: message.transmittedAt
+    });
   });
 
   // CloakTrace authentication route
