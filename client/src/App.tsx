@@ -14,6 +14,7 @@ import GlyphRepository from "@/pages/GlyphRepository";
 import CloakTraceAuth from "@/pages/CloakTraceAuth";
 import LogicModules from "@/pages/LogicModules";
 import QuantumServices from "@/pages/QuantumServices";
+import QuantumMessages from "@/pages/QuantumMessages";
 import Settings from "@/pages/Settings";
 
 function Router() {
@@ -25,6 +26,7 @@ function Router() {
       <Route path="/cloak-trace-auth" component={CloakTraceAuth} />
       <Route path="/logic-modules" component={LogicModules} />
       <Route path="/quantum-services" component={QuantumServices} />
+      <Route path="/quantum-messages" component={QuantumMessages} />
       <Route path="/settings" component={Settings} />
       <Route component={NotFound} />
     </Switch>
