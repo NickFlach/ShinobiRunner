@@ -123,6 +123,38 @@ export const insertAuthTokenSchema = createInsertSchema(authTokens).pick({
   expires: true,
 });
 
+// Quantum Messages schema
+export const quantumMessages = pgTable("quantum_messages", {
+  id: serial("id").primaryKey(),
+  messageId: text("message_id").notNull().unique(),
+  userId: integer("user_id").notNull(),
+  recipient: text("recipient").notNull(),
+  recipientEndpoint: text("recipient_endpoint").notNull(),
+  subject: text("subject").notNull(),
+  content: text("content").notNull(),
+  quantumKey: text("quantum_key").notNull(),
+  encryptionHash: text("encryption_hash").notNull(),
+  transmissionStatus: text("transmission_status").notNull().default("pending"),
+  missionId: text("mission_id"),
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").defaultNow(),
+  transmittedAt: timestamp("transmitted_at"),
+});
+
+export const insertQuantumMessageSchema = createInsertSchema(quantumMessages).pick({
+  messageId: true,
+  userId: true,
+  recipient: true,
+  recipientEndpoint: true,
+  subject: true,
+  content: true,
+  quantumKey: true,
+  encryptionHash: true,
+  transmissionStatus: true,
+  missionId: true,
+  metadata: true,
+});
+
 // Type definitions
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -144,3 +176,6 @@ export type InsertMissionLogic = z.infer<typeof insertMissionLogicSchema>;
 
 export type AuthToken = typeof authTokens.$inferSelect;
 export type InsertAuthToken = z.infer<typeof insertAuthTokenSchema>;
+
+export type QuantumMessage = typeof quantumMessages.$inferSelect;
+export type InsertQuantumMessage = z.infer<typeof insertQuantumMessageSchema>;
