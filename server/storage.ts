@@ -121,7 +121,12 @@ export class MemStorage implements IStorage {
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.userIdCounter++;
     const now = new Date();
-    const user: User = { ...insertUser, id, createdAt: now };
+    const user: User = { 
+      ...insertUser, 
+      role: insertUser.role ?? "operator",
+      id, 
+      createdAt: now 
+    };
     this.users.set(id, user);
     return user;
   }
@@ -144,7 +149,12 @@ export class MemStorage implements IStorage {
   async createGlyph(insertGlyph: InsertGlyph): Promise<Glyph> {
     const id = this.glyphIdCounter++;
     const now = new Date();
-    const glyph: Glyph = { ...insertGlyph, id, createdAt: now };
+    const glyph: Glyph = { 
+      ...insertGlyph, 
+      code: insertGlyph.code ?? null,
+      id, 
+      createdAt: now 
+    };
     this.glyphs.set(id, glyph);
     return glyph;
   }
@@ -167,7 +177,12 @@ export class MemStorage implements IStorage {
   async createLogicModule(insertModule: InsertLogicModule): Promise<LogicModule> {
     const id = this.logicModuleIdCounter++;
     const now = new Date();
-    const module: LogicModule = { ...insertModule, id, createdAt: now };
+    const module: LogicModule = { 
+      ...insertModule, 
+      status: insertModule.status ?? "active",
+      id, 
+      createdAt: now 
+    };
     this.logicModules.set(id, module);
     return module;
   }
@@ -190,7 +205,13 @@ export class MemStorage implements IStorage {
   async createQuantumService(insertService: InsertQuantumService): Promise<QuantumService> {
     const id = this.serviceIdCounter++;
     const now = new Date();
-    const service: QuantumService = { ...insertService, id, createdAt: now };
+    const service: QuantumService = { 
+      ...insertService, 
+      status: insertService.status ?? "active",
+      credentials: insertService.credentials ?? null,
+      id, 
+      createdAt: now 
+    };
     this.quantumServices.set(id, service);
     return service;
   }
@@ -217,6 +238,7 @@ export class MemStorage implements IStorage {
     
     const mission: Mission = { 
       ...insertMission, 
+      config: insertMission.config ?? null,
       id,
       missionId,
       status: 'pending',
