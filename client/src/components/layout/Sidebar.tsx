@@ -8,7 +8,8 @@ import {
   Layers, 
   Cpu, 
   Settings,
-  LogOut
+  LogOut,
+  Mail
 } from "lucide-react";
 
 interface SidebarProps {
@@ -25,6 +26,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   const navItems = [
     { path: "/", icon: <BarChart3 className="h-5 w-5" />, label: "Dashboard" },
     { path: "/missions", icon: <Zap className="h-5 w-5" />, label: "Missions" },
+    { path: "/quantum-messages", icon: <Mail className="h-5 w-5" />, label: "Quantum Messages" },
     { path: "/glyph-repository", icon: <Package className="h-5 w-5" />, label: "Glyph Repository" },
     { path: "/cloak-trace-auth", icon: <Shield className="h-5 w-5" />, label: "CloakTrace Auth" },
     { path: "/logic-modules", icon: <Layers className="h-5 w-5" />, label: "Logic Modules" },
