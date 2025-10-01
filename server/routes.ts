@@ -387,6 +387,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  app.patch('/api/quantum-messages/:id/status', async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ error: 'Invalid quantum message ID' });
+    }
+
+    try {
+      const updateStatusSchema = z.object({
+        status: z.enum(["pending", "transmitted", "delivered", "failed"])
+      });
+      
+      const { status } = updateStatusSchema.parse(req.body);
+      
+      const updatedMessage = await storage.updateQuantumMessageStatus(id, status);
+      
+      if (!updatedMessage) {
+        return res.status(404).json({ error: 'Quantum message not found' });
+      }
+      
+      broadcastMessage('quantumMessageStatusUpdated', updatedMessage);
+      res.json(updatedMessage);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ error: fromZodError(error).message });
+      } else {
+        res.status(500).json({ error: 'Failed to update quantum message status' });
+      }
+    }
+  });
+
   // CloakTrace authentication route
   app.post('/api/cloak-trace/verify', (_req: Request, res: Response) => {
     // Simulate quantum authentication verification

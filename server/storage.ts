@@ -347,7 +347,7 @@ export class MemStorage implements IStorage {
     const updatedMessage: QuantumMessage = {
       ...message,
       transmissionStatus: status,
-      transmittedAt: status === 'transmitted' ? new Date() : message.transmittedAt
+      transmittedAt: (status === 'transmitted' || status === 'delivered') ? new Date() : message.transmittedAt
     };
     
     this.quantumMessages.set(id, updatedMessage);
