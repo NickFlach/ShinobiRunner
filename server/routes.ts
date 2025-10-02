@@ -1,6 +1,5 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
-import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { 
   insertUserSchema, 
@@ -8,68 +7,17 @@ import {
   insertLogicModuleSchema,
   insertQuantumServiceSchema,
   insertMissionSchema,
-  insertMissionLogicSchema,
   insertQuantumMessageSchema
 } from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
-
-// Declare WebSocket server for managing connections
-let wss: WebSocketServer;
-const clients = new Map<string, WebSocket>();
-
-// Broadcasts a message to all connected clients
-const broadcastMessage = (type: string, data: any) => {
-  const message = JSON.stringify({ type, data });
-  
-  clients.forEach((client, id) => {
-    if (client.readyState === WebSocket.OPEN) {
-      client.send(message);
-    }
-  });
-};
+import { initWebSocketServer, broadcastMessage, processMission } from "./mission-processor";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
 
-  // Setup WebSocket server
-  wss = new WebSocketServer({ server: httpServer, path: '/ws' });
-  
-  wss.on('connection', (ws) => {
-    const clientId = Math.random().toString(36).substring(2, 10);
-    clients.set(clientId, ws);
-    
-    console.log(`WebSocket client connected: ${clientId}`);
-    
-    // Send initial system status
-    ws.send(JSON.stringify({
-      type: 'systemStatus',
-      data: { status: 'online' }
-    }));
-    
-    ws.on('message', async (message) => {
-      try {
-        const data = JSON.parse(message.toString());
-        console.log(`Received message from client ${clientId}:`, data);
-        
-        // Handle client messages
-        if (data.type === 'requestMissionsUpdate') {
-          const missions = await storage.listMissions();
-          ws.send(JSON.stringify({
-            type: 'missionsUpdate',
-            data: missions
-          }));
-        }
-      } catch (error) {
-        console.error('Error processing message:', error);
-      }
-    });
-    
-    ws.on('close', () => {
-      clients.delete(clientId);
-      console.log(`WebSocket client disconnected: ${clientId}`);
-    });
-  });
+  // Initialize WebSocket server
+  initWebSocketServer(httpServer);
 
   // API routes
   app.get('/api/system-status', async (_req: Request, res: Response) => {
@@ -432,64 +380,4 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   return httpServer;
-}
-
-// Function to process missions
-async function processMission(missionId: number): Promise<void> {
-  const mission = await storage.getMission(missionId);
-  if (!mission || mission.status !== 'active') return;
-
-  // Update to processing status
-  await storage.updateMissionStatus(missionId, 'processing', mission.progress);
-  
-  // Simulate mission progress updates
-  let currentProgress = mission.progress;
-  
-  const processInterval = setInterval(async () => {
-    const updatedMission = await storage.getMission(missionId);
-    
-    // Stop if mission no longer active
-    if (!updatedMission || !['active', 'processing'].includes(updatedMission.status)) {
-      clearInterval(processInterval);
-      return;
-    }
-    
-    // Increment progress
-    currentProgress += Math.floor(Math.random() * 5) + 1;
-    
-    if (currentProgress >= 100) {
-      currentProgress = 100;
-      clearInterval(processInterval);
-      
-      // Complete the mission
-      const completedMission = await storage.updateMissionStatus(missionId, 'completed', 100);
-      const result = {
-        completionTime: new Date().toISOString(),
-        status: 'success',
-        measurements: {
-          entanglement: Math.random().toFixed(4),
-          coherence: Math.random().toFixed(4),
-          fidelity: Math.random().toFixed(4)
-        }
-      };
-      
-      await storage.updateMissionResult(missionId, result);
-      
-      if (completedMission) {
-        // Broadcast mission completed to clients
-        broadcastMessage('missionUpdated', {
-          ...completedMission,
-          result
-        });
-      }
-    } else {
-      // Update mission progress
-      const updatedMission = await storage.updateMissionStatus(missionId, 'processing', currentProgress);
-      
-      if (updatedMission) {
-        // Broadcast mission update to clients
-        broadcastMessage('missionUpdated', updatedMission);
-      }
-    }
-  }, 3000); // Update every 3 seconds
 }
